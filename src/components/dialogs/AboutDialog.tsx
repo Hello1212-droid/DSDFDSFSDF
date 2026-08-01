@@ -10,8 +10,10 @@ const SHORTCUTS: Array<[string, string]> = [
   ["Ctrl+S", "Save now"],
   ["Ctrl+P", "Print / Save as PDF"],
   ["Ctrl+Shift+S", "Export as .docx"],
+  ["Ctrl+Enter", "Insert page break"],
   ["Enter", "New paragraph"],
   ["Shift+Enter", "Line break"],
+  ["Space / Enter (Hindi on)", "Convert Hinglish → Indian script"],
 ];
 
 export function AboutDialog() {

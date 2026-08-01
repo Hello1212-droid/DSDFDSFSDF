@@ -34,7 +34,15 @@ import {
   Undo2,
   ZoomIn,
   ZoomOut,
+  CaseSensitive,
+  Hash,
+  Languages,
+  Sheet,
+  SquareSplitHorizontal,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
+import { toggleSpeak, stopSpeaking, isSpeechSupported } from "../utils/tts";
 
 function Dropdown({ label, children }: { label: string; children: (close: () => void) => ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -126,6 +134,20 @@ export function MenuBar() {
             <Row icon={<Check size={16} />} shortcut="Ctrl+A" onClick={() => { editor?.chain().focus().selectAll().run(); close(); }}>Select all</Row>
             <div className="lk-menu-section" />
             <Row icon={<Eraser size={16} />} onClick={() => { editor?.chain().focus().unsetAllMarks().clearNodes().run(); close(); }}>Clear all formatting</Row>
+            {isSpeechSupported() && (
+              <>
+                <div className="lk-menu-section" />
+                <Row icon={<Volume2 size={16} />} onClick={() => {
+                  if (!editor) return;
+                  const { from, to } = editor.state.selection;
+                  const text = from !== to
+                    ? editor.state.doc.textBetween(from, to, " ")
+                    : editor.state.doc.textBetween(0, editor.state.doc.content.size, " ");
+                  toggleSpeak(text); close();
+                }}>Read aloud (from cursor / selection)</Row>
+                <Row icon={<VolumeX size={16} />} onClick={() => { stopSpeaking(); close(); }}>Stop reading</Row>
+              </>
+            )}
           </>
         )}
       </Dropdown>
@@ -142,6 +164,7 @@ export function MenuBar() {
             <Row icon={<Search size={16} />} checked={view === "focus"} onClick={() => { setView("focus"); close(); }}>Focus mode</Row>
             <Row icon={<Globe size={16} />} checked={view === "web"} onClick={() => { setView("web"); close(); }}>Web layout</Row>
             <div className="lk-menu-section" />
+            <Row icon={<Hash size={16} />} onClick={() => { openDialog("wordcount"); close(); }}>Word count…</Row>
             <Row icon={<Ruler size={16} />} onClick={() => { editor?.commands.scrollIntoView(); close(); }}>Go to cursor</Row>
           </>
         )}
@@ -150,9 +173,15 @@ export function MenuBar() {
       <Dropdown label="Insert">
         {(close) => (
           <>
+            <div className="lk-menu-label">Pages</div>
+            <Row icon={<SquareSplitHorizontal size={16} />} shortcut="Ctrl+Enter" onClick={() => { editor?.chain().focus().insertPageBreak().run(); close(); }}>Page break</Row>
+            <Row icon={<Sheet size={16} />} onClick={() => { editor?.chain().focus().addPageAtEnd().run(); close(); }}>New page at end</Row>
+            <div className="lk-menu-section" />
+            <div className="lk-menu-label">Elements</div>
             <Row icon={<Table size={16} />} onClick={() => { openDialog("table"); close(); }}>Table</Row>
             <Row icon={<Image size={16} />} onClick={() => { openDialog("image"); close(); }}>Image</Row>
             <Row icon={<Link size={16} />} shortcut="Ctrl+K" onClick={() => { openDialog("link"); close(); }}>Link</Row>
+            <Row icon={<Languages size={16} />} onClick={() => { openDialog("keyboard"); close(); }}>Indian keyboard…</Row>
             <div className="lk-menu-section" />
             <Row icon={<Minus size={16} />} onClick={() => { editor?.chain().focus().setHorizontalRule().run(); close(); }}>Horizontal rule</Row>
             <Row icon={<IndianRupee size={16} />} onClick={() => { editor?.chain().focus().insertContent("₹ ").run(); close(); }}>Rupee symbol (₹)</Row>
@@ -169,6 +198,12 @@ export function MenuBar() {
             <Row icon={<Italic size={16} />} shortcut="Ctrl+I" onClick={() => { editor?.chain().focus().toggleItalic().run(); close(); }}>Italic</Row>
             <Row icon={<Underline size={16} />} shortcut="Ctrl+U" onClick={() => { editor?.chain().focus().toggleUnderline().run(); close(); }}>Underline</Row>
             <Row icon={<Strikethrough size={16} />} onClick={() => { editor?.chain().focus().toggleStrike().run(); close(); }}>Strikethrough</Row>
+            <div className="lk-menu-section" />
+            <div className="lk-menu-label">Change case</div>
+            <Row icon={<CaseSensitive size={16} />} onClick={() => { editor?.chain().focus().toUpperCase().run(); close(); }}>UPPERCASE</Row>
+            <Row icon={<CaseSensitive size={16} />} onClick={() => { editor?.chain().focus().toLowerCase().run(); close(); }}>lowercase</Row>
+            <Row icon={<CaseSensitive size={16} />} onClick={() => { editor?.chain().focus().toTitleCase().run(); close(); }}>Title Case</Row>
+            <Row icon={<CaseSensitive size={16} />} onClick={() => { editor?.chain().focus().toSentenceCase().run(); close(); }}>Sentence case</Row>
             <div className="lk-menu-section" />
             <div className="lk-menu-label">Paragraph</div>
             <Row icon={<List size={16} />} onClick={() => { editor?.chain().focus().toggleBulletList().run(); close(); }}>Bulleted list</Row>

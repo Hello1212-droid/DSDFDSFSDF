@@ -264,6 +264,21 @@ body {
 .sarp-match { background: #fde68a; border-radius: 2px; }
 .sarp-current { background: #f59e0b; color: #fff; border-radius: 2px; }
 
+/* ============ Page break (on-screen) ============ */
+.lk-prose .page-break-view {
+  margin: 26px 0 22px;
+  user-select: none;
+}
+.lk-prose .page-break-line { border-top: 1px dashed #cbd5e1; }
+.lk-prose .page-break-tag {
+  display: flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 0;
+}
+.lk-prose .page-break-num { font-size: 11px; color: #94a3b8; letter-spacing: .04em; }
+.lk-prose .page-break-remove {
+  width: 18px; height: 18px; border-radius: 4px; color: #94a3b8; display: grid; place-items: center;
+}
+.lk-prose .page-break-remove:hover { background: #fecaca; color: #b91c1c; }
+
 /* ============ Status bar ============ */
 .lk-statusbar {
   height: 26px; background: var(--lk-toolbar-bg);
@@ -343,5 +358,11 @@ body {
     padding: 0 !important;
   }
   .lk-prose { font-size: 12pt; }
+  .lk-prose .page-break-view {
+    break-before: page;
+    page-break-before: always;
+    margin: 0; padding: 0;
+  }
+  .lk-prose .page-break-line, .lk-prose .page-break-tag, .lk-prose .page-break-remove { display: none; }
   @page { margin: 0.5in; }
 }

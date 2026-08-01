@@ -8,15 +8,20 @@ export function StatusBar() {
   const stats = useEditorState({
     editor,
     selector: ({ editor: e }) => {
-      if (!e) return { words: 0, chars: 0 };
+      if (!e) return { words: 0, chars: 0, pages: 1 };
       const cc = e.storage.characterCount as { words: () => number; characters: () => number };
+      let pageBreaks = 0;
+      e.state.doc.descendants((n) => {
+        if (n.type.name === "pageBreak") pageBreaks++;
+      });
       return {
         words: cc.words(),
         chars: cc.characters(),
         paragraphs: e.state.doc.childCount,
+        pages: pageBreaks + 1,
       };
     },
-  }) ?? { words: 0, chars: 0, paragraphs: 0 };
+  }) ?? { words: 0, chars: 0, paragraphs: 0, pages: 1 };
 
   const pageLabel =
     doc.pageSize.toUpperCase() + (doc.orientation === "landscape" ? " (Landscape)" : "");
@@ -26,6 +31,7 @@ export function StatusBar() {
       <div className="lk-status-left">
         <span>{stats.words.toLocaleString("en-IN")} words</span>
         <span>{stats.chars.toLocaleString("en-IN")} characters</span>
+        <span>{stats.pages} page{stats.pages > 1 ? "s" : ""}</span>
         <span className="hidden sm:inline">{pageLabel}</span>
         <span className="tabular text-gray-400">{hasChanges ? "Unsaved…" : "Saved ✓"}</span>
       </div>

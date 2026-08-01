@@ -28,8 +28,14 @@ import {
   Paintbrush,
   Highlighter,
   TextQuote,
+  Languages,
+  SquareSplitHorizontal,
+  Sheet,
+  Volume2,
+  Hash,
 } from "lucide-react";
 import { useState } from "react";
+import { toggleSpeak, isSpeechSupported } from "../utils/tts";
 
 function SplitBtn({ label, onSelect }: { label: string; onSelect: (v: string) => void }) {
   return (
@@ -252,6 +258,41 @@ export function Toolbar() {
         <button className="lk-btn" title="Horizontal rule" onClick={() => editor.chain().focus().setHorizontalRule().run()}><Minus size={16} /></button>
         <button className="lk-btn" title="Insert ₹ symbol" onClick={() => editor.chain().focus().insertContent("₹ ").run()}><IndianRupee size={16} /></button>
         <button className="lk-btn" title="Insert today's date" onClick={insertDate}><Calendar size={16} /></button>
+      </div>
+
+      {/* Language / pages / tools */}
+      <div className="lk-group">
+        <button
+          className="lk-btn"
+          title="Indian language keyboard (भारतीय कीबोर्ड)"
+          onClick={() => openDialog("keyboard")}
+        >
+          <Languages size={16} />
+        </button>
+        <button className="lk-btn" title="Insert page break (Ctrl+Enter)" onClick={() => editor.chain().focus().insertPageBreak().run()}>
+          <SquareSplitHorizontal size={16} />
+        </button>
+        <button className="lk-btn" title="Add a new page at the end" onClick={() => editor.chain().focus().addPageAtEnd().run()}>
+          <Sheet size={16} />
+        </button>
+        {isSpeechSupported() && (
+          <button
+            className="lk-btn"
+            title="Read aloud (text-to-speech)"
+            onClick={() => {
+              const { from, to } = editor.state.selection;
+              const text = from !== to
+                ? editor.state.doc.textBetween(from, to, " ")
+                : editor.state.doc.textBetween(0, editor.state.doc.content.size, " ");
+              toggleSpeak(text);
+            }}
+          >
+            <Volume2 size={16} />
+          </button>
+        )}
+        <button className="lk-btn" title="Word count" onClick={() => openDialog("wordcount")}>
+          <Hash size={16} />
+        </button>
       </div>
     </div>
   );

@@ -14,6 +14,8 @@ import { LinkDialog } from "./components/dialogs/LinkDialog";
 import { TableDialog } from "./components/dialogs/TableDialog";
 import { ImageDialog } from "./components/dialogs/ImageDialog";
 import { AboutDialog } from "./components/dialogs/AboutDialog";
+import { WordCountDialog } from "./components/dialogs/WordCountDialog";
+import { IndianKeyboardPanel } from "./components/IndianKeyboard";
 
 function DialogHost() {
   const { dialog } = useLekhana();
@@ -26,6 +28,8 @@ function DialogHost() {
     case "table": return <TableDialog />;
     case "image": return <ImageDialog />;
     case "about": return <AboutDialog />;
+    case "wordcount": return <WordCountDialog />;
+    case "keyboard": return <IndianKeyboardPanel />;
     default: return null;
   }
 }
@@ -54,6 +58,7 @@ function KeyboardShortcuts() {
       const mod = e.ctrlKey || e.metaKey;
       if (!mod) return;
       const key = e.key.toLowerCase();
+      if (e.key === "Enter") { e.preventDefault(); editor?.chain().focus().insertPageBreak().run(); return; }
       if (key === "s" && e.shiftKey) { e.preventDefault(); exportDocx(); }
       else if (key === "s") { e.preventDefault(); saveNow(); }
       else if (key === "p") { e.preventDefault(); window.print(); }

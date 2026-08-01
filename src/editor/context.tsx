@@ -33,6 +33,8 @@ export type DialogId =
   | "table"
   | "image"
   | "about"
+  | "keyboard"
+  | "wordcount"
   | null;
 
 interface LekhanaContextValue {

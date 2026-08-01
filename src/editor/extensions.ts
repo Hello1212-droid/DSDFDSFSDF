@@ -1,5 +1,8 @@
-import { Extension } from "@tiptap/core";
+import { Extension, Node } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
+import { ReactNodeViewRenderer } from "@tiptap/react";
+import { LanguageInputExtension } from "./languageInput";
+import { PageBreakView } from "../components/PageBreakView";
 import Underline from "@tiptap/extension-underline";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
@@ -125,6 +128,121 @@ export const LineHeight = Extension.create({
     return {
       setLineHeight: (value: string) => (args) => setBlockAttr("lineHeight", value)(args),
       unsetLineHeight: () => (args) => setBlockAttr("lineHeight", null)(args),
+    };
+  },
+});
+
+/* ---------------------------- Page break ---------------------------- */
+declare module "@tiptap/core" {
+  interface Commands<ReturnType> {
+    pageBreak: {
+      insertPageBreak: () => ReturnType;
+      addPageAtEnd: () => ReturnType;
+      removePageBreak: (pos: number) => ReturnType;
+    };
+  }
+}
+
+export const PageBreak = Node.create({
+  name: "pageBreak",
+  group: "block",
+  atom: true,
+  selectable: false,
+  draggable: false,
+  parseHTML() {
+    return [{ tag: 'hr[data-page-break]' }];
+  },
+  renderHTML() {
+    return ["div", { "data-page-break": "true", class: "page-break" }];
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(PageBreakView);
+  },
+  addCommands() {
+    return {
+      insertPageBreak:
+        () =>
+        ({ chain }) => {
+          // insert a page break at the cursor (splits the block)
+          return chain().insertContent({ type: "pageBreak" }).run();
+        },
+      addPageAtEnd:
+        () =>
+        ({ state, chain }) => {
+          const end = state.doc.content.size;
+          return chain()
+            .insertContentAt(end, [{ type: "pageBreak" }, { type: "paragraph" }])
+            .focus()
+            .run();
+        },
+      removePageBreak:
+        (pos) =>
+        ({ state, dispatch }) => {
+          const node = state.doc.nodeAt(pos);
+          if (!node || node.type.name !== "pageBreak") return false;
+          if (dispatch) {
+            dispatch(state.tr.delete(pos, pos + node.nodeSize));
+          }
+          return true;
+        },
+    };
+  },
+});
+
+/* ---------------------------- Text case transform ---------------------------- */
+declare module "@tiptap/core" {
+  interface Commands<ReturnType> {
+    textTransform: {
+      toUpperCase: () => ReturnType;
+      toLowerCase: () => ReturnType;
+      toTitleCase: () => ReturnType;
+      toSentenceCase: () => ReturnType;
+    };
+  }
+}
+
+function titleCase(s: string): string {
+  return s.replace(/\S+/g, (w) => w[0].toUpperCase() + w.slice(1).toLowerCase());
+}
+function sentenceCase(s: string): string {
+  return s.replace(/(^\s*\w|[.!?]\s+\w)/g, (m) => m.toUpperCase());
+}
+
+export const TextTransform = Extension.create({
+  name: "textTransform",
+  addCommands() {
+    const apply = (fn: (s: string) => string) => ({ state, dispatch }: any) => {
+      const { from, to } = state.selection;
+      if (from === to) return false;
+      const tr = state.tr;
+      const ranges: Array<[number, number, any]> = [];
+      state.doc.nodesBetween(from, to, (node: any, pos: number) => {
+        if (node.isText) {
+          const rf = Math.max(from, pos);
+          const rt = Math.min(to, pos + (node.text || "").length);
+          if (rt > rf) ranges.push([rf, rt, node]);
+        }
+      });
+      if (!ranges.length) return false;
+      let changed = false;
+      for (let i = ranges.length - 1; i >= 0; i--) {
+        const [rf, rt, node] = ranges[i];
+        const text = (node.text || "").slice(rf - node.pos, rt - node.pos);
+        const out = fn(text);
+        if (out !== text) {
+          tr.insertText(out, rf, rt);
+          changed = true;
+        }
+      }
+      if (!changed) return false;
+      if (dispatch) dispatch(tr);
+      return true;
+    };
+    return {
+      toUpperCase: () => apply((s) => s.toUpperCase()),
+      toLowerCase: () => apply((s) => s.toLowerCase()),
+      toTitleCase: () => apply(titleCase),
+      toSentenceCase: () => apply(sentenceCase),
     };
   },
 });
@@ -368,6 +486,9 @@ export const EDITOR_EXTENSIONS = [
     emptyNodeClass: "is-empty",
   }),
   SearchAndReplace,
+  PageBreak,
+  LanguageInputExtension,
+  TextTransform,
 ];
 
 /* Helper to read plain text (for word count). */
