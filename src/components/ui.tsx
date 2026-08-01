@@ -18,12 +18,14 @@ export function Modal({
   return (
     <div className="lk-modal-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className={cn("lk-modal", size === "sm" && "sm", size === "lg" && "lg")}>
-        <div className="lk-modal-header">
-          <div className="lk-modal-title">{title}</div>
-          <button className="lk-btn" onClick={onClose} aria-label="Close">
-            <X size={17} />
-          </button>
-        </div>
+        {title && (
+          <div className="lk-modal-header">
+            <div className="lk-modal-title">{title}</div>
+            <button className="lk-btn" onClick={onClose} aria-label="Close">
+              <X size={17} />
+            </button>
+          </div>
+        )}
         <div className="lk-modal-body">{children}</div>
         {footer && <div className="lk-modal-footer">{footer}</div>}
       </div>

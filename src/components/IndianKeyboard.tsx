@@ -59,18 +59,18 @@ export function IndianKeyboardPanel() {
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 w-[360px] bg-white shadow-2xl z-[80] flex flex-col border-l border-gray-200 lk-print-hide">
+    <div className="fixed inset-y-0 right-0 w-[360px] shadow-2xl z-[80] flex flex-col border-l lk-print-hide" style={{ background: "var(--lk-surface)", borderColor: "var(--lk-border)" }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+      <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "var(--lk-border-soft)" }}>
         <div>
-          <div className="font-semibold text-gray-900 text-[15px]">भारतीय कीबोर्ड</div>
-          <div className="text-[12px] text-gray-500">Indian language keyboard</div>
+          <div className="font-semibold text-[15px]" style={{ color: "var(--lk-text)" }}>भारतीय कीबोर्ड</div>
+          <div className="text-[12px]" style={{ color: "var(--lk-text-muted)" }}>Indian language keyboard</div>
         </div>
         <button className="lk-btn" onClick={closeDialog}><X size={18} /></button>
       </div>
 
       {/* Controls */}
-      <div className="px-4 py-3 border-b border-gray-100 space-y-3">
+      <div className="px-4 py-3 border-b space-y-3" style={{ borderColor: "var(--lk-border-soft)" }}>
         <div className="flex items-center justify-between">
           <span className="text-[13px] font-medium text-gray-700">Enable keyboard</span>
           <button
@@ -208,7 +208,7 @@ export function IndianKeyboardPanel() {
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-2 border-t border-gray-100 text-[11px] text-gray-400">
+      <div className="px-4 py-2 border-t text-[11px]" style={{ borderColor: "var(--lk-border-soft)", color: "var(--lk-text-faint)" }}>
         Documents are stored privately in your browser.
       </div>
     </div>

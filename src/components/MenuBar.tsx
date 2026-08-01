@@ -38,6 +38,7 @@ import {
   Hash,
   Languages,
   Sheet,
+  Settings,
   SquareSplitHorizontal,
   Volume2,
   VolumeX,
@@ -118,6 +119,7 @@ export function MenuBar() {
             <Row icon={<Globe size={16} />} onClick={() => { exportHtml(); close(); }}>Save as web page (.html)</Row>
             <Row icon={<FileJson2 size={16} />} onClick={() => { exportJson(); close(); }}>Save as JSON (backup)</Row>
             <div className="lk-menu-section" />
+            <Row icon={<Settings size={16} />} shortcut="Ctrl+," onClick={() => { openDialog("settings"); close(); }}>Settings</Row>
             <Row icon={<Info size={16} />} onClick={() => { openDialog("about"); close(); }}>About Lekhana</Row>
           </>
         )}

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { LekhanaProvider, useLekhana } from "./editor/context";
+import { ThemeProvider } from "./components/ThemeProvider";
 import { TitleBar } from "./components/TitleBar";
 import { MenuBar } from "./components/MenuBar";
 import { Toolbar } from "./components/Toolbar";
@@ -16,6 +17,7 @@ import { ImageDialog } from "./components/dialogs/ImageDialog";
 import { AboutDialog } from "./components/dialogs/AboutDialog";
 import { WordCountDialog } from "./components/dialogs/WordCountDialog";
 import { IndianKeyboardPanel } from "./components/IndianKeyboard";
+import { SettingsDialog } from "./components/dialogs/SettingsDialog";
 
 function DialogHost() {
   const { dialog } = useLekhana();
@@ -30,6 +32,7 @@ function DialogHost() {
     case "about": return <AboutDialog />;
     case "wordcount": return <WordCountDialog />;
     case "keyboard": return <IndianKeyboardPanel />;
+    case "settings": return <SettingsDialog />;
     default: return null;
   }
 }
@@ -64,6 +67,7 @@ function KeyboardShortcuts() {
       else if (key === "p") { e.preventDefault(); window.print(); }
       else if (key === "f" || key === "h") { e.preventDefault(); openDialog("find"); }
       else if (key === "o") { e.preventDefault(); openDialog("open"); }
+      else if (key === ",") { e.preventDefault(); openDialog("settings"); }
       else if (key === "=" || key === "+") { e.preventDefault(); setZoom(Math.min(2, zoom + 0.1)); }
       else if (key === "-") { e.preventDefault(); setZoom(Math.max(0.5, zoom - 0.1)); }
       else if (key === "0") { e.preventDefault(); setZoom(1); }
@@ -93,8 +97,10 @@ function Shell() {
 
 export default function App() {
   return (
-    <LekhanaProvider>
-      <Shell />
-    </LekhanaProvider>
+    <ThemeProvider>
+      <LekhanaProvider>
+        <Shell />
+      </LekhanaProvider>
+    </ThemeProvider>
   );
 }

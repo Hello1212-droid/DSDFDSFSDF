@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLekhana } from "../editor/context";
-import { FolderOpen, FileDown, Printer } from "lucide-react";
+import { FolderOpen, FileDown, Printer, Settings } from "lucide-react";
 
 export function TitleBar() {
   const { doc, renameDoc, openDialog, exportDocx, hasChanges } = useLekhana();
@@ -48,6 +48,7 @@ export function TitleBar() {
         <button className="lk-btn" title="Open (Ctrl+O)" onClick={() => openDialog("open")}><FolderOpen size={17} /></button>
         <button className="lk-btn" title="Export as Word (.docx)" onClick={exportDocx}><FileDown size={17} /></button>
         <button className="lk-btn" title="Print / Save as PDF (Ctrl+P)" onClick={() => window.print()}><Printer size={17} /></button>
+        <button className="lk-btn" title="Settings (Ctrl+,)" onClick={() => openDialog("settings")}><Settings size={17} /></button>
       </div>
     </div>
   );
