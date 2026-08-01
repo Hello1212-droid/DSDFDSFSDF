@@ -220,31 +220,58 @@ body {
   align-items: center;
 }
 .lk-canvas-inner {
-  display: flex;
-  justify-content: center;
-  width: max-content;
+  display: block;
   min-width: 100%;
 }
 .lk-canvas-inner .ProseMirror {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: block;
 }
 
 /* Each page is its own white sheet, exactly like MS Word */
 .lk-page-view {
   position: relative;
   width: var(--lk-page-width);
-  margin: 0 0 34px;
+  margin: 0 auto 40px; /* centered horizontally, clear vertical gap → no overlap */
+  flex-shrink: 0;
 }
 .lk-page-sheet {
   background: var(--lk-page-bg);
   box-shadow: 0 2px 14px var(--lk-shadow), 0 0 0 1px var(--lk-border);
-  width: var(--lk-page-width);
+  width: 100%;
   min-height: var(--lk-page-height);
   padding: var(--lk-page-pad);
   color: var(--lk-page-text);
+  overflow: hidden; /* contain content within the page */
 }
+/* ============ Equations / math (KaTeX) ============ */
+.lk-prose .math-block {
+  background: var(--lk-surface-2);
+  border: 1px solid var(--lk-border-soft);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 10px 0;
+  overflow-x: auto;
+  display: flex;
+  justify-content: center;
+}
+.lk-prose .math-block .katex-display { margin: 0; }
+.lk-prose .math-inline { padding: 0 2px; }
+
+/* ============ Math input panel ============ */
+.math-preview { overflow-x: auto; max-width: 100%; }
+.math-preview .katex { font-size: 1.35em; }
+.math-preview-empty { padding: 8px 4px; text-align: center; }
+.lk-math-canvas {
+  width: 100%;
+  height: 220px;
+  border: 2px solid var(--lk-border);
+  border-radius: 10px;
+  background: #fff;
+  cursor: crosshair;
+  touch-action: none;
+}
+[data-theme="dark"] .lk-math-canvas { background: #fff; } /* keep drawing surface white */
+
 /* Page controls (add / delete) revealed on hover */
 .lk-page-tools {
   position: absolute;

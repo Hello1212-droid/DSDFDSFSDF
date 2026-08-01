@@ -33,6 +33,8 @@ import {
   Sheet,
   Volume2,
   Hash,
+  Sigma,
+  PenTool,
 } from "lucide-react";
 import { useState } from "react";
 import { toggleSpeak, isSpeechSupported } from "../utils/tts";
@@ -258,6 +260,16 @@ export function Toolbar() {
         <button className="lk-btn" title="Horizontal rule" onClick={() => editor.chain().focus().setHorizontalRule().run()}><Minus size={16} /></button>
         <button className="lk-btn" title="Insert ₹ symbol" onClick={() => editor.chain().focus().insertContent("₹ ").run()}><IndianRupee size={16} /></button>
         <button className="lk-btn" title="Insert today's date" onClick={insertDate}><Calendar size={16} /></button>
+      </div>
+
+      {/* Math */}
+      <div className="lk-group">
+        <button className="lk-btn" title="Insert equation / formula (Σ)" onClick={() => openDialog("equation")}>
+          <Sigma size={16} />
+        </button>
+        <button className="lk-btn" title="Math input panel — handwrite an equation" onClick={() => openDialog("mathinput")}>
+          <PenTool size={16} />
+        </button>
       </div>
 
       {/* Language / pages / tools */}

@@ -27,12 +27,13 @@ export function PageArea() {
       className={`lk-canvas ${web ? "items-stretch" : ""}`}
       style={focus ? { background: "#1b1e24" } : undefined}
     >
-      {/* CSS variables drive page geometry in the page NodeViews */}
+      {/* CSS variables drive page geometry in the page NodeViews.
+          We use the `zoom` property (not transform) so scaling affects layout
+          and pages never overlap when zoomed in. */}
       <div
         className="lk-canvas-inner"
         style={{
-          transform: `scale(${zoom})`,
-          transformOrigin: "top center",
+          zoom: zoom,
           ["--lk-page-width" as any]: `${pageW}px`,
           ["--lk-page-height" as any]: `${pageH}px`,
           ["--lk-page-pad" as any]: `${m.top * MM_TO_PX}px ${m.right * MM_TO_PX}px ${m.bottom * MM_TO_PX}px ${m.left * MM_TO_PX}px`,

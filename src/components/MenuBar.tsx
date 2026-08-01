@@ -42,6 +42,8 @@ import {
   SquareSplitHorizontal,
   Volume2,
   VolumeX,
+  Sigma,
+  PenTool,
 } from "lucide-react";
 import { toggleSpeak, stopSpeaking, isSpeechSupported } from "../utils/tts";
 
@@ -183,6 +185,8 @@ export function MenuBar() {
             <Row icon={<Table size={16} />} onClick={() => { openDialog("table"); close(); }}>Table</Row>
             <Row icon={<Image size={16} />} onClick={() => { openDialog("image"); close(); }}>Image</Row>
             <Row icon={<Link size={16} />} shortcut="Ctrl+K" onClick={() => { openDialog("link"); close(); }}>Link</Row>
+            <Row icon={<Sigma size={16} />} shortcut="Alt+=" onClick={() => { openDialog("equation"); close(); }}>Equation / formula…</Row>
+            <Row icon={<PenTool size={16} />} onClick={() => { openDialog("mathinput"); close(); }}>Math input panel (handwrite)…</Row>
             <Row icon={<Languages size={16} />} onClick={() => { openDialog("keyboard"); close(); }}>Indian keyboard…</Row>
             <div className="lk-menu-section" />
             <Row icon={<Minus size={16} />} onClick={() => { editor?.chain().focus().setHorizontalRule().run(); close(); }}>Horizontal rule</Row>

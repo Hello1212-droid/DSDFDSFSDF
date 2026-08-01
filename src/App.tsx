@@ -18,6 +18,8 @@ import { AboutDialog } from "./components/dialogs/AboutDialog";
 import { WordCountDialog } from "./components/dialogs/WordCountDialog";
 import { IndianKeyboardPanel } from "./components/IndianKeyboard";
 import { SettingsDialog } from "./components/dialogs/SettingsDialog";
+import { EquationDialog } from "./components/dialogs/EquationDialog";
+import { MathInputPanel } from "./components/MathInputPanel";
 
 function DialogHost() {
   const { dialog } = useLekhana();
@@ -33,6 +35,8 @@ function DialogHost() {
     case "wordcount": return <WordCountDialog />;
     case "keyboard": return <IndianKeyboardPanel />;
     case "settings": return <SettingsDialog />;
+    case "equation": return <EquationDialog />;
+    case "mathinput": return <MathInputPanel />;
     default: return null;
   }
 }
@@ -68,7 +72,10 @@ function KeyboardShortcuts() {
       else if (key === "f" || key === "h") { e.preventDefault(); openDialog("find"); }
       else if (key === "o") { e.preventDefault(); openDialog("open"); }
       else if (key === ",") { e.preventDefault(); openDialog("settings"); }
-      else if (key === "=" || key === "+") { e.preventDefault(); setZoom(Math.min(2, zoom + 0.1)); }
+      else if (key === "=" || key === "+") {
+        if (e.altKey) { e.preventDefault(); openDialog("equation"); }
+        else { e.preventDefault(); setZoom(Math.min(2, zoom + 0.1)); }
+      }
       else if (key === "-") { e.preventDefault(); setZoom(Math.max(0.5, zoom - 0.1)); }
       else if (key === "0") { e.preventDefault(); setZoom(1); }
     };

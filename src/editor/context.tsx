@@ -37,6 +37,8 @@ export type DialogId =
   | "keyboard"
   | "wordcount"
   | "settings"
+  | "equation"
+  | "mathinput"
   | null;
 
 interface LekhanaContextValue {

@@ -20,6 +20,7 @@ import Subscript from "@tiptap/extension-subscript";
 import Superscript from "@tiptap/extension-superscript";
 import HorizontalRule from "@tiptap/extension-horizontal-rule";
 import FontFamily from "@tiptap/extension-font-family";
+import { Mathematics } from "@tiptap/extension-mathematics";
 import { TableKit } from "@tiptap/extension-table";
 import { Plugin, PluginKey, type EditorState } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
@@ -565,6 +566,7 @@ export const EDITOR_EXTENSIONS = [
   PageBreak,
   LanguageInputExtension,
   TextTransform,
+  Mathematics.configure({}),
 ];
 
 /* Helper to read plain text (for word count). */
