@@ -205,7 +205,7 @@ body {
   position: absolute; left: 4px; right: 4px; bottom: 3px; height: 3px; border-radius: 2px;
 }
 
-/* ============ Editor page area ============ */
+/* ============ Editor page area (multi-page, MS Word style) ============ */
 .lk-workspace {
   display: flex;
   flex-direction: column;
@@ -219,19 +219,65 @@ body {
   flex-direction: column;
   align-items: center;
 }
-.lk-page {
-  width: 794px; /* A4 @96dpi */
-  min-height: 1080px;
+.lk-canvas-inner {
+  display: flex;
+  justify-content: center;
+  width: max-content;
+  min-width: 100%;
+}
+.lk-canvas-inner .ProseMirror {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Each page is its own white sheet, exactly like MS Word */
+.lk-page-view {
+  position: relative;
+  width: var(--lk-page-width);
+  margin: 0 0 34px;
+}
+.lk-page-sheet {
   background: var(--lk-page-bg);
   box-shadow: 0 2px 14px var(--lk-shadow), 0 0 0 1px var(--lk-border);
-  padding: 56px 64px; /* ~ margins */
-  position: relative;
+  width: var(--lk-page-width);
+  min-height: var(--lk-page-height);
+  padding: var(--lk-page-pad);
+  color: var(--lk-page-text);
 }
-.lk-page.landscape { width: 1123px; min-height: 794px; }
-.lk-page.legal { width: 612px; min-height: 1286px; }
-.lk-page.legal.landscape { width: 1286px; min-height: 612px; }
-.lk-page.letter { width: 816px; min-height: 1056px; }
-.lk-page.a5 { width: 559px; min-height: 793px; }
+/* Page controls (add / delete) revealed on hover */
+.lk-page-tools {
+  position: absolute;
+  top: 10px;
+  right: -44px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity .15s ease;
+}
+.lk-page-view:hover .lk-page-tools { opacity: 1; }
+.lk-page-add, .lk-page-del {
+  width: 26px; height: 26px; border-radius: 7px;
+  display: grid; place-items: center;
+  background: var(--lk-surface);
+  border: 1px solid var(--lk-border);
+  color: var(--lk-primary);
+  cursor: pointer;
+  box-shadow: 0 1px 3px var(--lk-shadow);
+}
+.lk-page-add:hover { background: var(--lk-primary-soft); }
+.lk-page-del:hover { background: #fee2e2; color: #b91c1c; }
+.lk-page-footer {
+  position: absolute;
+  bottom: -24px; left: 0; right: 0;
+  text-align: center;
+}
+.lk-page-num { font-size: 11px; color: var(--lk-text-faint); }
+/* placeholder (loading) sheet */
+.lk-page-sheet.is-placeholder {
+  display: grid; place-items: center; color: var(--lk-text-faint);
+}
 
 /* Editor content typography (Word-like defaults) */
 .lk-prose {
@@ -393,11 +439,16 @@ body {
   body { overflow: visible !important; background: #fff; }
   .lk-titlebar, .lk-menubar, .lk-ribbon, .lk-statusbar, .lk-ruler, .lk-print-hide { display: none !important; }
   .lk-workspace, .lk-canvas { height: auto !important; overflow: visible !important; padding: 0 !important; display: block; }
-  .lk-page {
+  .lk-canvas-inner { transform: none !important; width: 100% !important; }
+  .lk-canvas-inner .ProseMirror { align-items: stretch; }
+  .lk-page-view { width: 100% !important; margin: 0 !important; break-after: page; page-break-after: always; }
+  .lk-page-view:last-child { break-after: auto; page-break-after: auto; }
+  .lk-page-sheet {
     box-shadow: none !important; border: none !important;
-    margin: 0 !important; width: 100% !important; min-height: 0 !important;
+    width: 100% !important; min-height: 0 !important;
     padding: 0 !important;
   }
+  .lk-page-tools, .lk-page-footer, .lk-page-num { display: none !important; }
   .lk-prose { font-size: 12pt; }
   .lk-prose .page-break-view {
     break-before: page;

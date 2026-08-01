@@ -22,10 +22,10 @@ export function WordCountDialog() {
     const text = doc.textBetween(0, doc.content.size, " ");
     const cc = editor.storage.characterCount as { words: () => number; characters: () => number };
     let paragraphs = 0;
-    let pageBreaks = 0;
+    let pages = 0;
     doc.descendants((n) => {
       if (n.type.name === "paragraph" && n.textContent.trim()) paragraphs++;
-      if (n.type.name === "pageBreak") pageBreaks++;
+      if (n.type.name === "page") pages++;
     });
     const words = cc.words();
     setStats({
@@ -34,7 +34,7 @@ export function WordCountDialog() {
       charsNoSpace: text.replace(/\s/g, "").length,
       paragraphs,
       lines: text.split("\n").length,
-      pages: pageBreaks + 1,
+      pages: pages || 1,
       readingMin: Math.max(1, Math.round(words / 200)),
     });
   }, [editor]);

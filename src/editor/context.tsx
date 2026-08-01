@@ -23,6 +23,7 @@ import {
 } from "../utils/storage";
 import type { DocMeta, EditorView } from "../types";
 import { exportAsDocx, exportAsTxt, downloadJson } from "../utils/export";
+import { wrapIntoPages } from "../utils/pages";
 
 export type DialogId =
   | "open"
@@ -137,6 +138,25 @@ export function LekhanaProvider({ children }: { children: ReactNode }) {
     if (doc.id) setActiveId(doc.id);
   }, [doc.id]);
 
+  // Normalise the document into page nodes once the editor is ready.
+  useEffect(() => {
+    if (editor) {
+      const paged = wrapIntoPages(editor.getJSON() as any);
+      editor.commands.setContent(paged);
+    }
+  }, [editor]);
+
+  /** Load content into the editor and wrap it into pages. */
+  const applyContent = useCallback(
+    (content: string) => {
+      if (!editor) return;
+      editor.commands.setContent(content);
+      const paged = wrapIntoPages(editor.getJSON() as any);
+      editor.commands.setContent(paged);
+    },
+    [editor],
+  );
+
   const setDoc = useCallback((d: DocMeta) => {
     setDocState(d);
     setHasChanges(false);
@@ -167,12 +187,12 @@ export function LekhanaProvider({ children }: { children: ReactNode }) {
     const d = newDoc();
     setDocState(d);
     setActiveId(d.id);
-    editor?.commands.setContent(d.content);
+    applyContent(d.content);
     editor?.commands.focus();
     setHasChanges(false);
     refreshDocs();
     toast("New document created");
-  }, [editor, refreshDocs, toast]);
+  }, [applyContent, editor, refreshDocs, toast]);
 
   const openDocById = useCallback(
     (id: string) => {
@@ -180,12 +200,12 @@ export function LekhanaProvider({ children }: { children: ReactNode }) {
       if (!d) return;
       setDocState(d);
       setActiveId(id);
-      editor?.commands.setContent(d.content);
+      applyContent(d.content);
       editor?.commands.focus();
       setHasChanges(false);
       refreshDocs();
     },
-    [editor, refreshDocs],
+    [applyContent, editor, refreshDocs],
   );
 
   const removeDoc = useCallback(
@@ -197,20 +217,20 @@ export function LekhanaProvider({ children }: { children: ReactNode }) {
         const target = rest[0] || newDoc();
         setDocState(target);
         setActiveId(target.id);
-        editor?.commands.setContent(target.content);
+        applyContent(target.content);
       }
     },
-    [editor, refreshDocs],
+    [applyContent, refreshDocs],
   );
 
   const loadTemplate = useCallback(
     (content: string) => {
-      editor?.commands.setContent(content);
+      applyContent(content);
       editor?.commands.focus();
       setHasChanges(true);
       toast("Template applied");
     },
-    [editor, toast],
+    [applyContent, editor, toast],
   );
 
   const exportDocx = useCallback(() => {

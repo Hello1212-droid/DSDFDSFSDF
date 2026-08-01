@@ -19,8 +19,6 @@ export function PageArea() {
   const pageH = isLand ? base.w : base.h;
   const m = doc.margins;
 
-  const padding = `${m.top * MM_TO_PX}px ${m.right * MM_TO_PX}px ${m.bottom * MM_TO_PX}px ${m.left * MM_TO_PX}px`;
-
   const focus = view === "focus";
   const web = view === "web";
 
@@ -29,30 +27,22 @@ export function PageArea() {
       className={`lk-canvas ${web ? "items-stretch" : ""}`}
       style={focus ? { background: "#1b1e24" } : undefined}
     >
+      {/* CSS variables drive page geometry in the page NodeViews */}
       <div
+        className="lk-canvas-inner"
         style={{
-          width: pageW,
           transform: `scale(${zoom})`,
           transformOrigin: "top center",
-          height: pageH * zoom,
+          ["--lk-page-width" as any]: `${pageW}px`,
+          ["--lk-page-height" as any]: `${pageH}px`,
+          ["--lk-page-pad" as any]: `${m.top * MM_TO_PX}px ${m.right * MM_TO_PX}px ${m.bottom * MM_TO_PX}px ${m.left * MM_TO_PX}px`,
         }}
       >
-        <div
-          className="lk-page"
-          style={{
-            width: pageW,
-            minHeight: pageH,
-            padding,
-            margin: "0 auto",
-            boxShadow: web ? "none" : undefined,
-          }}
-        >
-          {editor ? (
-            <EditorContent editor={editor} className="lk-prose" />
-          ) : (
-            <p className="text-gray-400">Loading editor…</p>
-          )}
-        </div>
+        {editor ? (
+          <EditorContent editor={editor} className="lk-prose" />
+        ) : (
+          <p className="lk-page-sheet" style={{ color: "var(--lk-text-faint)" }}>Loading editor…</p>
+        )}
       </div>
     </div>
   );

@@ -44,7 +44,7 @@ export function plainTextFromJson(json: any): string {
     }
     const children = node.content || [];
     children.forEach((c: any) => walk(c, true));
-    if (block && /paragraph|heading|listItem|blockquote|codeBlock|table|tableRow/.test(node.type || "")) {
+    if (block && /paragraph|heading|listItem|blockquote|codeBlock|table|tableRow|page/.test(node.type || "")) {
       out += "\n";
     }
   };

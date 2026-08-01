@@ -10,15 +10,15 @@ export function StatusBar() {
     selector: ({ editor: e }) => {
       if (!e) return { words: 0, chars: 0, pages: 1 };
       const cc = e.storage.characterCount as { words: () => number; characters: () => number };
-      let pageBreaks = 0;
+      let pages = 0;
       e.state.doc.descendants((n) => {
-        if (n.type.name === "pageBreak") pageBreaks++;
+        if (n.type.name === "page") pages++;
       });
       return {
         words: cc.words(),
         chars: cc.characters(),
         paragraphs: e.state.doc.childCount,
-        pages: pageBreaks + 1,
+        pages: pages || 1,
       };
     },
   }) ?? { words: 0, chars: 0, paragraphs: 0, pages: 1 };

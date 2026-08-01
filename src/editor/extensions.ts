@@ -1,8 +1,10 @@
-import { Extension, Node } from "@tiptap/core";
+import { Extension, mergeAttributes, Node } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
+import { Fragment } from "@tiptap/pm/model";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { LanguageInputExtension } from "./languageInput";
 import { PageBreakView } from "../components/PageBreakView";
+import { PageView } from "../components/PageView";
 import Underline from "@tiptap/extension-underline";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
@@ -132,12 +134,110 @@ export const LineHeight = Extension.create({
   },
 });
 
-/* ---------------------------- Page break ---------------------------- */
+/* ---------------------------- Page node (multi-page like MS Word) ---------------------------- */
+declare module "@tiptap/core" {
+  interface Commands<ReturnType> {
+    page: {
+      /** Split the current page at the cursor into two pages (like Word's page break). */
+      insertPageBreak: () => ReturnType;
+      /** Append a new empty page at the end of the document. */
+      addPageAtEnd: () => ReturnType;
+      /** Add a new empty page right after the page node at `pos`. */
+      addPageAfterNode: (pos: number) => ReturnType;
+      /** Delete the page node at `pos` (keeps at least one page). */
+      deletePage: (pos: number) => ReturnType;
+    };
+  }
+}
+
+/** Split the page containing the cursor at the cursor position into two pages. */
+function splitPageAtCursor(state: any, dispatch: any): boolean {
+  const { from } = state.selection;
+  const schema = state.schema;
+  const $pos = state.doc.resolve(from);
+  let pagePos = -1;
+  let pageNode: any = null;
+  for (let d = $pos.depth; d > 0; d--) {
+    const n = $pos.node(d);
+    if (n.type.name === "page") { pageNode = n; pagePos = $pos.before(d); break; }
+  }
+  if (!pageNode) return false;
+  const contentStart = pagePos + 1;
+  const contentEnd = contentStart + pageNode.content.size;
+  const offset = from - contentStart;
+  const ensure = (f: any) => (f.size ? f : Fragment.from(schema.nodes.paragraph.create()));
+  const beforeFrag = ensure(pageNode.content.cut(0, offset));
+  const afterFrag = ensure(pageNode.content.cut(offset, pageNode.content.size));
+  const tr = state.tr;
+  tr.replaceWith(contentStart, contentEnd, beforeFrag);
+  const newPagePos = contentStart + beforeFrag.size + 1;
+  const newPage = schema.nodes.page.create(null, afterFrag);
+  tr.insert(newPagePos, newPage);
+  // place cursor at start of the new page
+  tr.setSelection(state.selection.constructor.near(tr.doc.resolve(newPagePos + 1)));
+  if (dispatch) dispatch(tr);
+  return true;
+}
+
+export const Page = Node.create({
+  name: "page",
+  group: "block",
+  content: "block+",
+  defining: true,
+  selectable: false,
+  draggable: false,
+  parseHTML() {
+    return [{ tag: "section[data-lekhana-page]" }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ["section", mergeAttributes({ "data-lekhana-page": "" }, HTMLAttributes)];
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(PageView);
+  },
+  addCommands() {
+    const schemaAt = (state: any) => state.schema;
+    return {
+      insertPageBreak: () => ({ state, dispatch }) => splitPageAtCursor(state, dispatch),
+      addPageAtEnd:
+        () =>
+        ({ state, dispatch }) => {
+          const schema = schemaAt(state);
+          const end = state.doc.content.size + 1;
+          const newPage = schema.nodes.page.create(null, schema.nodes.paragraph.create());
+          const tr = state.tr.insert(end, newPage).scrollIntoView();
+          if (dispatch) dispatch(tr);
+          return true;
+        },
+      addPageAfterNode:
+        (pos) =>
+        ({ state, dispatch }) => {
+          const schema = schemaAt(state);
+          const node = state.doc.nodeAt(pos);
+          if (!node || node.type.name !== "page") return false;
+          const newPage = schema.nodes.page.create(null, schema.nodes.paragraph.create());
+          const tr = state.tr.insert(pos + node.nodeSize, newPage).scrollIntoView();
+          if (dispatch) dispatch(tr);
+          return true;
+        },
+      deletePage:
+        (pos) =>
+        ({ state, dispatch }) => {
+          const node = state.doc.nodeAt(pos);
+          if (!node || node.type.name !== "page") return false;
+          if (state.doc.childCount <= 1) return false; // keep at least one page
+          const tr = state.tr.delete(pos, pos + node.nodeSize);
+          if (dispatch) dispatch(tr);
+          return true;
+        },
+    };
+  },
+});
+
+/* ---------------------------- Legacy page break (for importing old docs) ---------------------------- */
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     pageBreak: {
-      insertPageBreak: () => ReturnType;
-      addPageAtEnd: () => ReturnType;
       removePageBreak: (pos: number) => ReturnType;
     };
   }
@@ -157,35 +257,6 @@ export const PageBreak = Node.create({
   },
   addNodeView() {
     return ReactNodeViewRenderer(PageBreakView);
-  },
-  addCommands() {
-    return {
-      insertPageBreak:
-        () =>
-        ({ chain }) => {
-          // insert a page break at the cursor (splits the block)
-          return chain().insertContent({ type: "pageBreak" }).run();
-        },
-      addPageAtEnd:
-        () =>
-        ({ state, chain }) => {
-          const end = state.doc.content.size;
-          return chain()
-            .insertContentAt(end, [{ type: "pageBreak" }, { type: "paragraph" }])
-            .focus()
-            .run();
-        },
-      removePageBreak:
-        (pos) =>
-        ({ state, dispatch }) => {
-          const node = state.doc.nodeAt(pos);
-          if (!node || node.type.name !== "pageBreak") return false;
-          if (dispatch) {
-            dispatch(state.tr.delete(pos, pos + node.nodeSize));
-          }
-          return true;
-        },
-    };
   },
 });
 
@@ -471,7 +542,11 @@ export const EDITOR_EXTENSIONS = [
     defaultProtocol: "https",
     HTMLAttributes: { rel: "noopener noreferrer nofollow" },
   }),
-  Image.configure({ allowBase64: true, inline: false }),
+  Image.configure({
+    allowBase64: true,
+    inline: false,
+    resize: { enabled: true, minWidth: 40, minHeight: 40, alwaysPreserveAspectRatio: true },
+  }),
   TextAlign.configure({ types: ["heading", "paragraph"] }),
   TableKit,
   TaskList,
@@ -486,6 +561,7 @@ export const EDITOR_EXTENSIONS = [
     emptyNodeClass: "is-empty",
   }),
   SearchAndReplace,
+  Page,
   PageBreak,
   LanguageInputExtension,
   TextTransform,

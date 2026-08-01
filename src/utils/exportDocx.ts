@@ -294,13 +294,27 @@ function convertBlock(node: any, ctx: ListCtx, json?: any): Paragraph[] {
 /** Async traversal building the whole document (images handled asynchronously). */
 async function buildChildrenAsync(node: any, ctx: ListCtx): Promise<Paragraph[]> {
   const out: Paragraph[] = [];
-  for (const child of node.content || []) {
-    if (child.type === "image") {
-      out.push(...(await buildImage(child)));
+  const children = node.content || [];
+  const isPaged = children.some((c: any) => c.type === "page");
+  let prevPage = false;
+  for (const child of children) {
+    if (child.type === "page") {
+      if (prevPage) {
+        // Start a new physical page in Word
+        out.push(new Paragraph({ pageBreakBefore: true, children: [] }));
+      }
+      out.push(...(await buildChildrenAsync(child, ctx)));
+      prevPage = true;
     } else {
-      out.push(...convertBlock(child, ctx, node));
+      if (child.type === "image") {
+        out.push(...(await buildImage(child)));
+      } else {
+        out.push(...convertBlock(child, ctx, node));
+      }
+      prevPage = false;
     }
   }
+  void isPaged;
   return out;
 }
 
